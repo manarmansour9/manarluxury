@@ -5,23 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checkout - MyShop</title>
 <style>
-:root { --accent:#e6007e; --bg:#f8f8f8; --muted:#666; }
-body { font-family:Segoe UI,Tahoma,Arial; background:var(--bg); margin:0; color:#222; }
+body { font-family:Segoe UI,Tahoma,Arial; background:#f8f8f8; margin:0; color:#222; }
 .container { max-width:800px; margin:0 auto; padding:16px; }
-h2 { color:var(--accent); }
-.cart-summary, .payment-method, .customer-info { background:#fff; padding:16px; border-radius:10px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,.1); }
+h2 { color:#e6007e; }
+.cart-summary, .customer-info { background:#fff; padding:16px; border-radius:10px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,.1); }
 .cart-item { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
 .cart-item img { width:60px; border-radius:6px; margin-right:12px; }
 .cart-total { font-weight:700; text-align:right; margin-top:12px; }
 label { display:block; margin-bottom:10px; font-weight:600; }
-input[type="radio"] { margin-right:8px; }
 input[type="text"], select, textarea { width:100%; padding:8px; margin-top:4px; border-radius:6px; border:1px solid #ccc; }
 textarea { resize:none; }
-.pay-btn { background:var(--accent); color:#fff; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; float:right; font-weight:600; transition:0.3s; }
+.pay-btn { background:#e6007e; color:#fff; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; float:right; font-weight:600; transition:0.3s; }
 .pay-btn:hover { background:#b30063; }
 a.back-btn { display:inline-block; margin-bottom:16px; background:#eee; padding:8px 12px; border-radius:6px; text-decoration:none; color:#222; }
 a.back-btn:hover { background:#ddd; }
-#cardInfo { display:none; margin-top:12px; }
 </style>
 </head>
 <body>
@@ -31,44 +28,36 @@ a.back-btn:hover { background:#ddd; }
 
 <div class="cart-summary" id="cart-summary"></div>
 
-<div class="customer-info">
-  <h3>Customer Information</h3>
-  <label>Name <input type="text" id="customerName" placeholder="Your full name"></label>
-  <label>Phone <input type="text" id="customerPhone" placeholder="Phone number"></label>
-
-  <label>City
-    <select id="customerCity">
-      <option value="">-- Select City --</option>
-      <option value="Ramallah">Ramallah</option>
-      <option value="Jerusalem">Jerusalem</option>
-      <option value="Hebron">Hebron</option>
-      <option value="Nablus">Nablus</option>
-      <option value="Jenin">Jenin</option>
-      <option value="Bethlehem">Bethlehem</option>
-      <option value="Tulkarm">Tulkarm</option>
-      <option value="Qalqilya">Qalqilya</option>
-      <option value="Gaza">Gaza</option>
-    </select>
-  </label>
-
-  <label>Detailed Address
-    <textarea id="customerAddress" rows="3" placeholder="Street, building, landmarks..."></textarea>
-  </label>
-</div>
-
-<div class="payment-method">
-  <label>Choose Payment Method:</label>
-  <input type="radio" name="payment" value="cash" id="pay-cash" checked> <label for="pay-cash">Cash</label>
-  <input type="radio" name="payment" value="card" id="pay-card"> <label for="pay-card">Credit Card</label>
-
-  <div id="cardInfo">
-    <label>Card Number <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456"></label>
-    <label>Expiry Date <input type="text" id="cardExpiry" placeholder="MM/YY"></label>
-    <label>CVV <input type="text" id="cardCVV" placeholder="123"></label>
+<form id="checkoutForm" action="https://formspree.io/f/xjkeergk" method="POST">
+  <div class="customer-info">
+    <h3>Customer Information</h3>
+    <label>Name <input type="text" name="name" id="customerName" placeholder="Your full name" required></label>
+    <label>Phone <input type="text" name="phone" id="customerPhone" placeholder="Phone number" required></label>
+    <label>City
+      <select name="city" id="customerCity" required>
+        <option value="">-- Select City --</option>
+        <option value="Ramallah">Ramallah</option>
+        <option value="Jerusalem">Jerusalem</option>
+        <option value="Hebron">Hebron</option>
+        <option value="Nablus">Nablus</option>
+        <option value="Jenin">Jenin</option>
+        <option value="Bethlehem">Bethlehem</option>
+        <option value="Tulkarm">Tulkarm</option>
+        <option value="Qalqilya">Qalqilya</option>
+        <option value="Gaza">Gaza</option>
+      </select>
+    </label>
+    <label>Detailed Address
+      <textarea name="address" id="customerAddress" rows="3" placeholder="Street, building, landmarks..." required></textarea>
+    </label>
   </div>
-</div>
 
-<button class="pay-btn" id="payBtn">Confirm Payment</button>
+  <!-- Hidden cart data -->
+  <input type="hidden" name="cart" id="cartData">
+
+  <button type="submit" class="pay-btn">Confirm Payment</button>
+</form>
+
 <div id="successMsg" style="display:none; margin-top:20px; padding:15px; background:#4CAF50; color:#fff; font-weight:600; border-radius:8px;">✔ Payment Successful! Thank you!</div>
 </div>
 
@@ -129,25 +118,23 @@ const products = [
 ];
 
 
-function getCart(){ return JSON.parse(localStorage.getItem('cart')||'[]'); }
+const cart = JSON.parse(localStorage.getItem('cart')||'[]');
 
 function renderCartSummary(){
-  const cart = getCart();
   const container = document.getElementById('cart-summary');
   container.innerHTML = '';
   if(cart.length===0){ container.innerHTML='<p>Your cart is empty.</p>'; return; }
   let total = 0;
   cart.forEach(item=>{
-    const p = products.find(prod=>prod.id===item.id);
-    const colorObj = p.colors && item.color ? p.colors.find(c=>c.name===item.color) : null;
-    const imgSrc = colorObj ? colorObj.img : p.img || '';
-    const itemTotal = p.price * item.qty;
+    const p = products.find(prod=>prod.id===item.id) || {};
+    const color = item.color ? ` (${item.color})` : '';
+    const itemTotal = (p.price||0) * item.qty;
     total += itemTotal;
     const div = document.createElement('div');
     div.className = 'cart-item';
     div.innerHTML = `<div style="display:flex;align-items:center;">
-      <img src="${imgSrc}" alt="${p.title}">
-      <span>${p.title}${item.color ? ' ('+item.color+')' : ''}</span>
+      <img src="${item.selectedImg||p.img||''}" alt="${p.title||''}">
+      <span>${p.title||''}${color} x${item.qty}</span>
     </div>
     <div>$${itemTotal}</div>`;
     container.appendChild(div);
@@ -158,36 +145,19 @@ function renderCartSummary(){
   container.appendChild(totalDiv);
 }
 
-const payBtn = document.getElementById('payBtn');
-const cardInfo = document.getElementById('cardInfo');
-document.querySelectorAll('input[name="payment"]').forEach(radio=>{
-  radio.addEventListener('change', ()=>{
-    cardInfo.style.display = radio.value==='card' ? 'block' : 'none';
-  });
-});
-
-payBtn.addEventListener('click', ()=>{
-  const name = document.getElementById('customerName').value.trim();
-  const phone = document.getElementById('customerPhone').value.trim();
-  const city = document.getElementById('customerCity').value;
-  const address = document.getElementById('customerAddress').value.trim();
-  const payment = document.querySelector('input[name="payment"]:checked').value;
-
-  if(!name || !phone || !city || !address){ alert("⚠ Please fill all customer info!"); return; }
-
-  if(payment==='card'){
-    const cardNumber = document.getElementById('cardNumber').value.trim();
-    const cardExpiry = document.getElementById('cardExpiry').value.trim();
-    const cardCVV = document.getElementById('cardCVV').value.trim();
-    if(!cardNumber || !cardExpiry || !cardCVV){ alert("⚠ Please fill all card details!"); return; }
-  }
-
-  document.getElementById('successMsg').style.display='block';
-  localStorage.removeItem('cart');
-  renderCartSummary();
-});
 renderCartSummary();
+
+const form = document.getElementById('checkoutForm');
+const cartInput = document.getElementById('cartData');
+
+form.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  if(cart.length===0){ alert("Cart is empty!"); return; }
+  cartInput.value = JSON.stringify(cart);
+  form.submit();
+  localStorage.removeItem('cart');
+  document.getElementById('successMsg').style.display='block';
+});
 </script>
 </body>
 </html>
-
