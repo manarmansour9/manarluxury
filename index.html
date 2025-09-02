@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MANAR - Demo Clone</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div id="splash">
+      <div class="splash-content">
+        <div class="splash-logo">MANAR LUXURY</div>
+      </div>
+    </div>
+
+    <div class="container header-inner">
+      <div class="logo">MANAR LUXURY</div>
+      <div class="header-actions">
+        <input id="searchInput" type="search" placeholder="Search products..." />
+        <button id="cartBtn" class="cart-btn">🛒 <span id="cartCount">0</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container main">
+    <section class="hero">
+      <div class="hero-text">
+        <h1>Latest Beauty Products</h1>
+        <p>Shop the best brands in one place — demo experience</p>
+      </div>
+      <img src="https://tse1.mm.bing.net/th/id/OIP.yjwpFD6kt4vC5_9N5nG0lQHaE8?rs=1&pid=ImgDetMain&o=7&rm=3" />
+    </section>
+
+    <section class="catalog">
+      <aside class="filters">
+        <h3>Filter</h3>
+        <label>Category 
+          <select id="categoryFilter">
+            <option value="all">All</option>
+            <option value="makeup">Makeup</option>
+            <option value="skincare">Skincare</option>
+            <option value="perfume">Perfume</option>
+          </select>
+        </label>
+        <label>Min Price 
+          <input id="minPrice" type="number" placeholder="0" />
+        </label>
+        <label>Sort By 
+          <select id="sortSelect">
+            <option value="default">Newest</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+          </select>
+        </label>
+        <button id="clearFilters">Clear Filters</button>
+      </aside>
+
+      <section class="products-area">
+        <div id="productsGrid" class="products-grid"></div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Demo version — for learning purposes only.</p>
+    </div>
+
+    <a href="https://wa.me/970595661004" target="_blank" 
+       style="position:fixed; bottom:20px; right:20px; background:#25D366; color:#fff; padding:12px 18px; border-radius:50px; font-family:sans-serif; font-size:16px; text-decoration:none; box-shadow:0 4px 6px rgba(0,0,0,0.2);">
+       تواصل معنا على واتساب
+    </a>
+  </footer>
+
+  <template id="productCardTemplate">
+    <div class="product-card">
+      <img class="p-image" src="" alt="">
+      <div class="p-info">
+        <h4 class="p-title"></h4>
+        <p class="p-price"></p>
+        <div class="p-actions">
+          <button class="view-btn">View</button>
+          <button class="add-btn">Add to Cart</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script src="scripts.js"></script>
+  <script>
+    window.addEventListener("load", () => {
+      const splash = document.getElementById("splash");
+      setTimeout(() => {
+        splash.classList.add("fade-out");
+        setTimeout(() => {
+          splash.style.display = "none";
+        }, 1000);
+      }, 1000); // يظل السبلش 3 ثواني
+    });
+  </script>
+</body>
+</html>

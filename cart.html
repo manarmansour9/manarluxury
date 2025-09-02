@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopping Cart</title>
+<style>
+  body{font-family:Segoe UI,Tahoma,Arial;margin:0;background:#f8f8f8;color:#222}
+  .container{max-width:700px;margin:0 auto;padding:16px}
+  .site-header{background:#fff;padding:12px;box-shadow:0 1px 6px rgba(0,0,0,.06);display:flex;justify-content:space-between;align-items:center}
+  .logo{font-weight:800;color:#e6007e;font-size:22px}
+  table{width:100%;border-collapse:collapse;margin-top:20px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+  th,td{padding:12px;text-align:left;border-bottom:1px solid #ddd}
+  th{background:#f4f4f4}
+  td img{width:60px;border-radius:6px;object-fit:cover;margin-right:10px;vertical-align:middle}
+  button{padding:6px 10px;border:none;background:#e6007e;color:#fff;border-radius:6px;cursor:pointer}
+  .total{margin-top:10px;font-size:18px;font-weight:700}
+  .checkout{background:#4CAF50;margin-top:10px;padding:12px 18px;font-size:16px;border-radius:8px;width:100%;cursor:pointer}
+  .back-btn{display:inline-block;margin-top:10px;padding:10px 16px;background:#e6007e;color:#fff;border-radius:8px;text-decoration:none;font-weight:600}
+  .color-label { display:inline-block; padding:2px 6px; border-radius:6px; background:#eee; margin-left:5px; font-size:12px; color:#333; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="site-header">
+    <div class="logo">MyShop</div>
+    <a href="index.html" class="back-btn">🏠 Home</a>
+  </header>
+
+  <main>
+    <table id="cartTable">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Subtotal</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="total"></div>
+
+    <button class="checkout" id="checkoutBtn">Complete Purchase</button>
+  </main>
+</div>
+
+<script>
+const products = [
+  { 
+    id:1, 
+    title:"rhode lipgloss", 
+    price:110, 
+    category:"makeup", 
+    img:"https://i.pinimg.com/736x/5f/b2/1f/5fb21f02581ae2292d3dc112815eea85.jpg", 
+    desc:"Brightens and smooths skin.",
+    colors: [
+      { name:"Red", code:"#d32f2f", img:"https://www.rhodeskin.com/cdn/shop/files/guava-spritz-hero_8_1024x.jpg?v=1718244713" },
+      { name:"Nude", code:"#c49a6c", img:"https://www.rhodeskin.com/cdn/shop/files/Hero-4-Mobile_1a691f4c-1ff4-4a2f-ae7c-41dd0aca8ef8_1800x.jpg?v=1695313199" },
+      { name:"Pink", code:"#ec407a", img:"https://tse3.mm.bing.net/th/id/OIP.51cgKvI6U3ga5NbMfzBfRQHaKy?rs=1&pid=ImgDetMain&o=7&rm=3" }
+    ]
+  },
+  { 
+    id:2, 
+    title:"HUDA BEAUTY POWDER", 
+    price:87, 
+    category:"makeup", 
+    img:"https://tse4.mm.bing.net/th/id/OIP.sSvysAzDREKmNMXYCpiltQHaHa", 
+    desc:"Brightens and smooths skin.",
+    colors: [
+      { name:"Light", code:"#f5d7b5", img:"https://th.bing.com/th/id/R.be239acd65025d2dbb120149dd72cd0e?rik=XC1BAi8trFu71g&riu=http%3a%2f%2fwww.yourglamlb.com%2fcdn%2fshop%2ffiles%2f61Kc_dP_0dL._AC_UL600_SR600_600.jpg%3fv%3d1714397205&ehk=m3QKCZFISJ%2f%2f6U2rrB5upDcJSwhFojUbNLE2gQ8bJlM%3d&risl=&pid=ImgRaw&r=0" },
+      { name:"Medium", code:"#d2a679", img:"https://tse4.mm.bing.net/th/id/OIP._fHkcFXrLkyq8iRRdBxBuAAAAA?rs=1&pid=ImgDetMain&o=7&rm=3" },
+      { name:"Dark", code:"#8d5c32", img:"https://tse1.mm.bing.net/th/id/OIP.RSTb4Z4CiuUaqVMQ_wYfIQHaHa?rs=1&pid=ImgDetMain&o=7&rm=3" }
+    ]
+  },
+  { 
+    id:3, 
+    title:"CHARLOUT TILBURY HOLLWOOD FLAWLES ", 
+    price:65, 
+    category:"makeup", 
+    img:"https://tse2.mm.bing.net/th/id/OIP.ix2ZH16H5CrUzOVkO7gWIAHaI4", 
+    desc:"Brightens and smooths skin.",
+    colors: [
+      { name:"01", code:"#fce0c8", img:"https://tse2.mm.bing.net/th/id/OIP.WaaJ_7M4Ub12I1o462KtagHaJ4?rs=1&pid=ImgDetMain&o=7&rm=3" },
+      { name:"02", code:"#d2a679", img:"https://images.glambot.com/f5992f6bb553641ead3f8e56a0ba952a?" },
+      { name:"03", code:"#8d5c32", img:"https://m.media-amazon.com/images/I/61tcW24aNOL.jpg" }
+    ]
+  },
+  { id:4, title:"RARE BEAUTY BLUSHER", price:100, category:"makeup", img:"https://th.bing.com/th/id/OIP.qEfia6seixHcxzARMTzliAHaNK?o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3", desc:"Brightens and smooths skin." }, 
+  { id:5, title:"THE ORDANIRY PRODUCTS", price:95, category:"skincare", img:"https://tse1.mm.bing.net/th/id/OIP._tftRjeOCieAtr2rUA69WwHaHm?rs=1&pid=ImgDetMain&o=7&rm=3", desc:"Brightens and smooths skin." }, 
+  { id:6, title:"benifit 4 mini kit", price:45, category:"makeup", img:"https://th.bing.com/th/id/R.e65835a920b248ccb8d536eb655ff1de?rik=nmFjwJR2bHb9OQ&pid=ImgRaw&r=0", desc:"mini kit of best seller." }, 
+  { id:7, title:"bang bang mascara", price:35, category:"makeup", img:"https://tse4.mm.bing.net/th/id/OIP.t4T_NCK_8OMWsZcUSapLVQHaHa?w=1200&h=1200&rs=1&pid=ImgDetMain&o=7&rm=3", desc:"best volume and length ." }, 
+  { id:8, title:"ELIE SAAB", price:150, category:"perfume", img:"https://tse3.mm.bing.net/th/id/OIP.dRe-tQjXf4C8DEH_1YFQfgHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", desc:" for luxury and feminin smell." }, 
+  { id:9, title:"gucci floral", price:85, category:"perfume", img:"https://tse3.mm.bing.net/th/id/OIP.LeSTpe8dT-FEkJUlzZU7LAHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", desc:"rose and floral smell." }, 
+  { id:10, title:"BACARAT ROUGH", price:200, category:"perfume", img:"https://tse1.mm.bing.net/th/id/OIP.6KDoHBzpiCsaVMqKyk_eDAHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", desc:"feminin and good smell." }, 
+  { id:11, title:"ysl libre", price:145, category:"perfume", img:"https://tse4.mm.bing.net/th/id/OIP.u3TfR_u1XRSB_N9goSTEbwHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", desc:"strong , feminin smell." }, 
+  { id:12, title:"LANGIN ", price:25, category:"skincare", img:"https://th.bing.com/th/id/R.841237b582e6cc425b8ce9df1718a38d?rik=252oht%2f2V8VIQA&pid=ImgRaw&r=0", desc:"LIP GLOWY PALM." }, 
+  { id:13, title:"CLINIQUE", price:65, category:"skincare", img:"https://th.bing.com/th/id/R.cb1c033a9d30fd5060cfcf8e3315c1e5?rik=rpTgfz8D4bCUEA&riu=http%3a%2f%2fbpc.h-cdn.co%2fassets%2f16%2f24%2f1600x800%2flandscape-1465933706-clinique-makeup-skincare.jpg&ehk=y%2fSLzGXu%2bOaEgy6fyo7A8c8k%2fXaVlK9g2zwNWL6x7Jg%3d&risl=&pid=ImgRaw&r=0", desc:"19 product from Clinique." }, 
+  { id:14, title:"NARS foundation", price:79, category:"makeup", img:"https://www.refinery29.com/images/10015361.jpg", desc:"flawles skin and full coverage" }, 
+  { id:15, title:"NARS BLUSHR", price:53, category:"makeup", img:"https://tse2.mm.bing.net/th/id/OIP.X4mw_XNiA2P3_Lb7-0SdDAHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", desc:"Brightens and smooths skin." }, 
+  { id:16, title:"NARS LIPSTIK", price:53, category:"makeup", img:"https://i5.walmartimages.com/asr/cc46db69-cb1a-46b5-b91a-040816f19474_1.a1519ecfa9f73feded71ec94e038d01f.jpeg", desc:"Brightens and smooths lips and stay for 8 hours." } 
+];
+
+
+const cart = JSON.parse(localStorage.getItem('cart')||'[]');
+const tbody = document.querySelector('#cartTable tbody');
+const totalEl = document.querySelector('.total');
+const checkoutBtn = document.getElementById('checkoutBtn');
+
+function renderCart() {
+  tbody.innerHTML = '';
+  if(cart.length===0){ 
+    tbody.innerHTML = '<tr><td colspan="5">Cart is empty.</td></tr>'; 
+    totalEl.textContent=''; 
+    return; 
+  }
+  let total = 0;
+  cart.forEach(item => {
+    const p = products.find(x=>x.id===item.id);
+    const colorObj = p.colors && item.color ? p.colors.find(c=>c.name===item.color) : null;
+    const imgSrc = colorObj ? colorObj.img : p.img || '';
+    const subtotal = p.price * item.qty;
+    total += subtotal;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><img src="${imgSrc}" alt="${p.title}"> ${p.title} ${item.color ? `<span class="color-label">${item.color}</span>` : ''}</td>
+      <td>$${p.price}</td>
+      <td>${item.qty}</td>
+      <td>$${subtotal}</td>
+      <td><button onclick="removeItem(${p.id},'${item.color||''}')">Remove</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  totalEl.textContent = "Total: $" + total;
+}
+
+function removeItem(id,color){
+  const index = cart.findIndex(c=>c.id===id && c.color===color);
+  if(index!==-1) cart.splice(index,1);
+  localStorage.setItem('cart', JSON.stringify(cart));
+  renderCart();
+}
+
+checkoutBtn.addEventListener('click', ()=>{
+  if(cart.length===0){ alert("Cart is empty!"); return; }
+  window.location.href = "checkout.html";
+});
+
+renderCart();
+</script>
+</body>
+</html>
+

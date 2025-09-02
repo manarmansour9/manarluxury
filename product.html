@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Details</title>
+<style>
+:root { --accent:#e6007e; --bg:#f8f8f8; --muted:#666; }
+body { font-family:Segoe UI,Tahoma,Arial; background:var(--bg); margin:0; color:#222; }
+.container { max-width:1000px; margin:0 auto; padding:16px; }
+.site-header { display:flex; justify-content:space-between; align-items:center; background:#fff; padding:12px 16px; border-radius:8px; margin-bottom:20px; box-shadow:0 2px 6px rgba(0,0,0,.1); }
+.logo { font-weight:800; color:var(--accent); font-size:22px; }
+.back-btn { background:var(--accent); color:#fff; padding:10px 16px; border-radius:8px; text-decoration:none; font-weight:600; transition:0.3s; }
+.back-btn:hover { background:#b30063; }
+
+.product-detail {
+  display:flex; gap:20px; background:#fff; border-radius:12px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,.1);
+  opacity:0; transform:translateY(30px); animation:fadeSlide 0.6s forwards;
+}
+@keyframes fadeSlide { to { opacity:1; transform:translateY(0); } }
+
+.product-detail img {
+  width:350px; border-radius:12px; object-fit:cover; transition:transform 0.3s;
+}
+.product-detail img:hover { transform:scale(1.05); }
+
+.product-info h2 { margin:0 0 10px 0; color:var(--accent); }
+.product-info p { margin:6px 0; }
+.cart-btn {
+  background:var(--accent); color:#fff; border:none; padding:10px 16px; border-radius:8px; cursor:pointer; font-weight:600; transition:0.3s;
+}
+.cart-btn:hover { background:#b30063; }
+
+.color-options { display:flex; gap:8px; margin-top:10px; }
+.color-circle { width:24px; height:24px; border-radius:50%; cursor:pointer; border:2px solid #fff; box-shadow:0 0 2px rgba(0,0,0,.5); }
+.color-circle.selected { border:2px solid #000; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="site-header">
+    <div class="logo">MyShop</div>
+    <a href="index.html" class="back-btn">🏠 Home</a>
+  </header>
+
+  <main>
+    <div id="product-detail"></div>
+  </main>
+</div>
+
+<script>
+// المنتجات
+const products = [
+  { 
+    id:1, title:"rhode lipgloss", price:110, category:"Makeup", 
+    img:"https://i.pinimg.com/736x/5f/b2/1f/5fb21f02581ae2292d3dc112815eea85.jpg", 
+    desc:"A hydrating and glossy lip treatment enriched with peptides for soft, smooth, and shiny lips. Perfect for everyday use.",
+    colors:[
+      {name:"Red", code:"#d32f2f", img:"https://www.rhodeskin.com/cdn/shop/files/guava-spritz-hero_8_1024x.jpg?v=1718244713"},
+      {name:"Nude", code:"#c49a6c", img:"https://www.rhodeskin.com/cdn/shop/files/Hero-4-Mobile_1a691f4c-1ff4-4a2f-ae7c-41dd0aca8ef8_1800x.jpg?v=1695313199"},
+      {name:"Pink", code:"#ec407a", img:"https://tse3.mm.bing.net/th/id/OIP.51cgKvI6U3ga5NbMfzBfRQHaKy?rs=1&pid=ImgDetMain&o=7&rm=3"}
+    ]
+  },
+  { id:2, title:"huda beauty powder", price:87, category:"makeup", img:"https://tse4.mm.bing.net/th/id/OIP.sSvysAzDREKmNMXYCpiltQHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", desc:"Silky, weightless powder that sets makeup, controls shine, and provides a natural, flawless finish without creasing." },
+ { 
+    id:3, 
+    title:"CHARLOUT TILBURY HOLLWOOD FLAWLES ", 
+    price:65, 
+    category:"makeup", 
+    img:"https://tse2.mm.bing.net/th/id/OIP.ix2ZH16H5CrUzOVkO7gWIAHaI4", 
+    desc:"Brightens and smooths skin.",
+    colors: [
+      { name:"01", code:"#fce0c8", img:"https://tse2.mm.bing.net/th/id/OIP.WaaJ_7M4Ub12I1o462KtagHaJ4?rs=1&pid=ImgDetMain&o=7&rm=3" },
+      { name:"02", code:"#d2a679", img:"https://images.glambot.com/f5992f6bb553641ead3f8e56a0ba952a?" },
+      { name:"03", code:"#8d5c32", img:"https://m.media-amazon.com/images/I/61tcW24aNOL.jpg" }
+    ]
+  },
+  { id:4, title:"RARE BEAUTY BLUSHER", price:100, category:"skincare", img:"https://th.bing.com/th/id/OIP.qEfia6seixHcxzARMTzliAHaNK?o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3", desc:"Brightens and smooths skin." }, 
+  { id:5, title:"THE ORDANIRY PRODUCTS", price:95, category:"skincare", img:"https://tse1.mm.bing.net/th/id/OIP._tftRjeOCieAtr2rUA69WwHaHm?rs=1&pid=ImgDetMain&o=7&rm=3", desc:"Brightens and smooths skin." }, 
+  { id:6, title:"benifit 4 mini kit", price:45, category:"makeup", img:"https://th.bing.com/th/id/R.e65835a920b248ccb8d536eb655ff1de?rik=nmFjwJR2bHb9OQ&pid=ImgRaw&r=0", desc:"mini kit of best seller." }, 
+  { id:7, title:"bang bang mascara", price:35, category:"makeup", img:"https://tse4.mm.bing.net/th/id/OIP.t4T_NCK_8OMWsZcUSapLVQHaHa?w=1200&h=1200&rs=1&pid=ImgDetMain&o=7&rm=3", desc:"best volume and length ." }, 
+  { id:8, title:"ELIE SAAB", price:150, category:"perfume", img:"https://tse3.mm.bing.net/th/id/OIP.dRe-tQjXf4C8DEH_1YFQfgHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", desc:" for luxury and feminin smell." }, 
+  { id:9, title:"gucci floral", price:85, category:"perfume", img:"https://tse3.mm.bing.net/th/id/OIP.LeSTpe8dT-FEkJUlzZU7LAHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", desc:"rose and floral smell." }, 
+  { id:10, title:"BACARAT ROUGH", price:200, category:"perfume", img:"https://tse1.mm.bing.net/th/id/OIP.6KDoHBzpiCsaVMqKyk_eDAHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", desc:"feminin and good smell." }, 
+  { id:11, title:"ysl libre", price:145, category:"perfume", img:"https://tse4.mm.bing.net/th/id/OIP.u3TfR_u1XRSB_N9goSTEbwHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", desc:"strong , feminin smell." }, 
+  { id:12, title:"LANGIN ", price:25, category:"skincare", img:"https://th.bing.com/th/id/R.841237b582e6cc425b8ce9df1718a38d?rik=252oht%2f2V8VIQA&pid=ImgRaw&r=0", desc:"LIP GLOWY PALM." }, 
+  { id:13, title:"CLINIQUE", price:65, category:"skincare", img:"https://th.bing.com/th/id/R.cb1c033a9d30fd5060cfcf8e3315c1e5?rik=rpTgfz8D4bCUEA&riu=http%3a%2f%2fbpc.h-cdn.co%2fassets%2f16%2f24%2f1600x800%2flandscape-1465933706-clinique-makeup-skincare.jpg&ehk=y%2fSLzGXu%2bOaEgy6fyo7A8c8k%2fXaVlK9g2zwNWL6x7Jg%3d&risl=&pid=ImgRaw&r=0", desc:"19 product from Clinique." }, 
+  { id:14, title:"NARS foundation", price:79, category:"makeup", img:"https://www.refinery29.com/images/10015361.jpg", desc:"flawles skin and full coverage" }, 
+  { id:15, title:"NARS BLUSHR", price:53, category:"makeup", img:"https://tse2.mm.bing.net/th/id/OIP.X4mw_XNiA2P3_Lb7-0SdDAHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", desc:"Brightens and smooths skin." }, 
+  { id:16, title:"NARS LIPSTIK", price:53, category:"makeup", img:"https://i5.walmartimages.com/asr/cc46db69-cb1a-46b5-b91a-040816f19474_1.a1519ecfa9f73feded71ec94e038d01f.jpeg", desc:"Brightens and smooths lips and stay for 8 hours." } 
+];
+
+
+// جلب المنتج من URL
+const params = new URLSearchParams(window.location.search);
+const productId = parseInt(params.get("id"));
+const product = products.find(p => p.id===productId);
+const container = document.getElementById("product-detail");
+
+// جلب اللون المختار من localStorage
+let selectedColor = localStorage.getItem("selectedColor_" + productId);
+
+if(product){
+  let imgSrc = product.img;
+  let colorName = "";
+  if(product.colors && selectedColor){
+    const colorObj = product.colors.find(c=>c.name===selectedColor);
+    if(colorObj){ imgSrc = colorObj.img; colorName = colorObj.name; }
+  }
+
+  container.innerHTML = `
+    <div class="product-detail">
+      <img id="prodImage" src="${imgSrc}" alt="${product.title}">
+      <div class="product-info">
+        <h2>${product.title}</h2>
+        <p><strong>Category:</strong> ${product.category}</p>
+        <p><strong>Price:</strong> $${product.price}</p>
+        <p>${product.desc}</p>
+        ${colorName ? `<p><strong>Selected Color:</strong> <span id="selectedColorName">${colorName}</span></p>` : ""}
+        ${product.colors ? `<div class="color-options" id="colorOptions"></div>` : ""}
+        <button class="cart-btn" id="addToCartBtn">Add to Cart</button>
+      </div>
+    </div>
+  `;
+
+  // إنشاء دوائر الألوان إذا موجودة
+  if(product.colors){
+    const colorContainer = document.getElementById("colorOptions");
+    product.colors.forEach(c=>{
+      const span = document.createElement("span");
+      span.classList.add("color-circle");
+      if(c.name===colorName) span.classList.add("selected");
+      span.style.backgroundColor = c.code;
+      span.addEventListener("click", ()=>{
+        document.getElementById("prodImage").src = c.img;
+        selectedColor = c.name;
+        localStorage.setItem("selectedColor_" + productId, selectedColor);
+        document.getElementById("selectedColorName").textContent = selectedColor;
+        document.querySelectorAll(".color-circle").forEach(el=>el.classList.remove("selected"));
+        span.classList.add("selected");
+      });
+      colorContainer.appendChild(span);
+    });
+  }
+
+  document.getElementById("addToCartBtn").addEventListener("click", ()=>{
+    const cart = JSON.parse(localStorage.getItem("cart")||'[]');
+    const index = cart.findIndex(i=>i.id===productId && i.color===selectedColor);
+    if(index>-1) cart[index].qty++;
+    else cart.push({id:productId, qty:1, color:selectedColor||null});
+    localStorage.setItem("cart", JSON.stringify(cart));
+    window.location.href = "cart.html";
+  });
+
+}else{
+  container.innerHTML = "<p>Product not found.</p>";
+}
+</script>
+</body>
+</html>
+
+
