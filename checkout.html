@@ -52,16 +52,16 @@ a.back-btn:hover { background:#ddd; }
     </label>
   </div>
 
-  <!-- Hidden cart data -->
-  <input type="hidden" name="cart" id="cartData">
-
   <button type="submit" class="pay-btn">Confirm Payment</button>
 </form>
 
-<div id="successMsg" style="display:none; margin-top:20px; padding:15px; background:#4CAF50; color:#fff; font-weight:600; border-radius:8px;">✔ Payment Successful! Thank you!</div>
+<div id="successMsg" style="display:none; margin-top:20px; padding:15px; background:#4CAF50; color:#fff; font-weight:600; border-radius:8px;">
+✔ Payment Successful! Thank you!
+</div>
 </div>
 
 <script>
+// المنتجات
 const products = [
   { 
     id:1, 
@@ -118,8 +118,10 @@ const products = [
 ];
 
 
+// جلب الكرت من localStorage
 const cart = JSON.parse(localStorage.getItem('cart')||'[]');
 
+// عرض ملخص الكرت
 function renderCartSummary(){
   const container = document.getElementById('cart-summary');
   container.innerHTML = '';
@@ -147,13 +149,36 @@ function renderCartSummary(){
 
 renderCartSummary();
 
+// إرسال الفورم بشكل صحيح لكل منتج
 const form = document.getElementById('checkoutForm');
-const cartInput = document.getElementById('cartData');
 
 form.addEventListener('submit', (e)=>{
   e.preventDefault();
   if(cart.length===0){ alert("Cart is empty!"); return; }
-  cartInput.value = JSON.stringify(cart);
+
+  // مسح أي حقول مخفية قديمة
+  document.querySelectorAll('input[name^="products"]').forEach(i=>i.remove());
+
+  // إنشاء حقول لكل منتج
+  cart.forEach((item,index)=>{
+    const p = products.find(prod=>prod.id===item.id) || {};
+
+    const fields = [
+      {name:`products[${index}][title]`, value:p.title || ''},
+      {name:`products[${index}][color]`, value:item.color || ''},
+      {name:`products[${index}][qty]`, value:item.qty},
+      {name:`products[${index}][price]`, value:p.price || 0},
+    ];
+
+    fields.forEach(f=>{
+      const input = document.createElement('input');
+      input.type='hidden';
+      input.name = f.name;
+      input.value = f.value;
+      form.appendChild(input);
+    });
+  });
+
   form.submit();
   localStorage.removeItem('cart');
   document.getElementById('successMsg').style.display='block';
