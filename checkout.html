@@ -5,20 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checkout - MyShop</title>
 <style>
-body { font-family:Segoe UI,Tahoma,Arial; background:#f8f8f8; margin:0; color:#222; }
+:root { --accent:#e6007e; --bg:#f8f8f8; --muted:#666; }
+body { font-family:Segoe UI,Tahoma,Arial; background:var(--bg); margin:0; color:#222; }
 .container { max-width:800px; margin:0 auto; padding:16px; }
-h2 { color:#e6007e; }
-.cart-summary, .customer-info { background:#fff; padding:16px; border-radius:10px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,.1); }
+h2 { color:var(--accent); }
+.cart-summary, .payment-method, .customer-info { background:#fff; padding:16px; border-radius:10px; margin-bottom:20px; box-shadow:0 4px 12px rgba(0,0,0,.1); }
 .cart-item { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
 .cart-item img { width:60px; border-radius:6px; margin-right:12px; }
 .cart-total { font-weight:700; text-align:right; margin-top:12px; }
 label { display:block; margin-bottom:10px; font-weight:600; }
+input[type="radio"] { margin-right:8px; }
 input[type="text"], select, textarea { width:100%; padding:8px; margin-top:4px; border-radius:6px; border:1px solid #ccc; }
 textarea { resize:none; }
-.pay-btn { background:#e6007e; color:#fff; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; float:right; font-weight:600; transition:0.3s; }
+.pay-btn { background:var(--accent); color:#fff; padding:10px 20px; border:none; border-radius:8px; cursor:pointer; float:right; font-weight:600; transition:0.3s; }
 .pay-btn:hover { background:#b30063; }
 a.back-btn { display:inline-block; margin-bottom:16px; background:#eee; padding:8px 12px; border-radius:6px; text-decoration:none; color:#222; }
 a.back-btn:hover { background:#ddd; }
+#cardInfo { display:none; margin-top:12px; }
 </style>
 </head>
 <body>
@@ -28,115 +31,75 @@ a.back-btn:hover { background:#ddd; }
 
 <div class="cart-summary" id="cart-summary"></div>
 
-<form id="checkoutForm" action="https://formspree.io/f/xjkeergk" method="POST">
-  <div class="customer-info">
-    <h3>Customer Information</h3>
-    <label>Name <input type="text" name="name" id="customerName" placeholder="Your full name" required></label>
-    <label>Phone <input type="text" name="phone" id="customerPhone" placeholder="Phone number" required></label>
-    <label>City
-      <select name="city" id="customerCity" required>
-        <option value="">-- Select City --</option>
-        <option value="Ramallah">Ramallah</option>
-        <option value="Jerusalem">Jerusalem</option>
-        <option value="Hebron">Hebron</option>
-        <option value="Nablus">Nablus</option>
-        <option value="Jenin">Jenin</option>
-        <option value="Bethlehem">Bethlehem</option>
-        <option value="Tulkarm">Tulkarm</option>
-        <option value="Qalqilya">Qalqilya</option>
-        <option value="Gaza">Gaza</option>
-      </select>
-    </label>
-    <label>Detailed Address
-      <textarea name="address" id="customerAddress" rows="3" placeholder="Street, building, landmarks..." required></textarea>
-    </label>
-  </div>
+<div class="customer-info">
+  <h3>Customer Information</h3>
+  <label>Name <input type="text" id="customerName" placeholder="Your full name"></label>
+  <label>Phone <input type="text" id="customerPhone" placeholder="Phone number"></label>
 
+  <label>City
+    <select id="customerCity">
+      <option value="">-- Select City --</option>
+      <option value="Ramallah">Ramallah</option>
+      <option value="Jerusalem">Jerusalem</option>
+      <option value="Hebron">Hebron</option>
+      <option value="Nablus">Nablus</option>
+      <option value="Jenin">Jenin</option>
+      <option value="Bethlehem">Bethlehem</option>
+      <option value="Tulkarm">Tulkarm</option>
+      <option value="Qalqilya">Qalqilya</option>
+      <option value="Gaza">Gaza</option>
+    </select>
+  </label>
+
+  <label>Detailed Address
+    <textarea id="customerAddress" rows="3" placeholder="Street, building, landmarks..."></textarea>
+  </label>
+</div>
+
+<div class="payment-method">
+  <label>Choose Payment Method:</label>
+  <input type="radio" name="payment" value="cash" id="pay-cash" checked> <label for="pay-cash">Cash</label>
+  <input type="radio" name="payment" value="card" id="pay-card"> <label for="pay-card">Credit Card</label>
+
+  <div id="cardInfo">
+    <label>Card Number <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456"></label>
+    <label>Expiry Date <input type="text" id="cardExpiry" placeholder="MM/YY"></label>
+    <label>CVV <input type="text" id="cardCVV" placeholder="123"></label>
+  </div>
+</div>
+
+<!-- Formspree Form -->
+<form id="orderForm" action="https://formspree.io/f/xjkeergk" method="POST">
+  <input type="hidden" name="customerName" id="formName">
+  <input type="hidden" name="customerPhone" id="formPhone">
+  <input type="hidden" name="customerCity" id="formCity">
+  <input type="hidden" name="customerAddress" id="formAddress">
+  <input type="hidden" name="paymentMethod" id="formPayment">
+  <input type="hidden" name="cartItems" id="formCart">
+  
   <button type="submit" class="pay-btn">Confirm Payment</button>
 </form>
 
-<div id="successMsg" style="display:none; margin-top:20px; padding:15px; background:#4CAF50; color:#fff; font-weight:600; border-radius:8px;">
-✔ Payment Successful! Thank you!
-</div>
+<div id="successMsg" style="display:none; margin-top:20px; padding:15px; background:#4CAF50; color:#fff; font-weight:600; border-radius:8px;">✔ Order Sent Successfully! Thank you!</div>
 </div>
 
 <script>
-// المنتجات
-const products = [
-  { 
-    id:1, 
-    title:"rhode lipgloss", 
-    price:110, 
-    category:"makeup", 
-    img:"https://i.pinimg.com/736x/5f/b2/1f/5fb21f02581ae2292d3dc112815eea85.jpg", 
-    desc:"Brightens and smooths skin.",
-    colors: [
-      { name:"Red", code:"#d32f2f", img:"https://www.rhodeskin.com/cdn/shop/files/guava-spritz-hero_8_1024x.jpg?v=1718244713" },
-      { name:"Nude", code:"#c49a6c", img:"https://www.rhodeskin.com/cdn/shop/files/Hero-4-Mobile_1a691f4c-1ff4-4a2f-ae7c-41dd0aca8ef8_1800x.jpg?v=1695313199" },
-      { name:"Pink", code:"#ec407a", img:"https://tse3.mm.bing.net/th/id/OIP.51cgKvI6U3ga5NbMfzBfRQHaKy?rs=1&pid=ImgDetMain&o=7&rm=3" }
-    ]
-  },
-  { 
-    id:2, 
-    title:"HUDA BEAUTY POWDER", 
-    price:87, 
-    category:"makeup", 
-    img:"https://tse4.mm.bing.net/th/id/OIP.sSvysAzDREKmNMXYCpiltQHaHa", 
-    desc:"Brightens and smooths skin.",
-    colors: [
-      { name:"Light", code:"#f5d7b5", img:"https://th.bing.com/th/id/R.be239acd65025d2dbb120149dd72cd0e?rik=XC1BAi8trFu71g&riu=http%3a%2f%2fwww.yourglamlb.com%2fcdn%2fshop%2ffiles%2f61Kc_dP_0dL._AC_UL600_SR600_600.jpg%3fv%3d1714397205&ehk=m3QKCZFISJ%2f%2f6U2rrB5upDcJSwhFojUbNLE2gQ8bJlM%3d&risl=&pid=ImgRaw&r=0" },
-      { name:"Medium", code:"#d2a679", img:"https://tse4.mm.bing.net/th/id/OIP._fHkcFXrLkyq8iRRdBxBuAAAAA?rs=1&pid=ImgDetMain&o=7&rm=3" },
-      { name:"Dark", code:"#8d5c32", img:"https://tse1.mm.bing.net/th/id/OIP.RSTb4Z4CiuUaqVMQ_wYfIQHaHa?rs=1&pid=ImgDetMain&o=7&rm=3" }
-    ]
-  },
-  { 
-    id:3, 
-    title:"CHARLOUT TILBURY HOLLWOOD FLAWLES ", 
-    price:65, 
-    category:"makeup", 
-    img:"https://tse2.mm.bing.net/th/id/OIP.ix2ZH16H5CrUzOVkO7gWIAHaI4", 
-    desc:"Brightens and smooths skin.",
-    colors: [
-      { name:"01", code:"#fce0c8", img:"https://tse2.mm.bing.net/th/id/OIP.WaaJ_7M4Ub12I1o462KtagHaJ4?rs=1&pid=ImgDetMain&o=7&rm=3" },
-      { name:"02", code:"#d2a679", img:"https://images.glambot.com/f5992f6bb553641ead3f8e56a0ba952a?" },
-      { name:"03", code:"#8d5c32", img:"https://m.media-amazon.com/images/I/61tcW24aNOL.jpg" }
-    ]
-  },
-  { id:4, title:"RARE BEAUTY BLUSHER", price:100, category:"makeup", img:"https://th.bing.com/th/id/OIP.qEfia6seixHcxzARMTzliAHaNK?o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3", desc:"Brightens and smooths skin." }, 
-  { id:5, title:"THE ORDANIRY PRODUCTS", price:95, category:"skincare", img:"https://tse1.mm.bing.net/th/id/OIP._tftRjeOCieAtr2rUA69WwHaHm?rs=1&pid=ImgDetMain&o=7&rm=3", desc:"Brightens and smooths skin." }, 
-  { id:6, title:"benifit 4 mini kit", price:45, category:"makeup", img:"https://th.bing.com/th/id/R.e65835a920b248ccb8d536eb655ff1de?rik=nmFjwJR2bHb9OQ&pid=ImgRaw&r=0", desc:"mini kit of best seller." }, 
-  { id:7, title:"bang bang mascara", price:35, category:"makeup", img:"https://tse4.mm.bing.net/th/id/OIP.t4T_NCK_8OMWsZcUSapLVQHaHa?w=1200&h=1200&rs=1&pid=ImgDetMain&o=7&rm=3", desc:"best volume and length ." }, 
-  { id:8, title:"ELIE SAAB", price:150, category:"perfume", img:"https://tse3.mm.bing.net/th/id/OIP.dRe-tQjXf4C8DEH_1YFQfgHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", desc:" for luxury and feminin smell." }, 
-  { id:9, title:"gucci floral", price:85, category:"perfume", img:"https://tse3.mm.bing.net/th/id/OIP.LeSTpe8dT-FEkJUlzZU7LAHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", desc:"rose and floral smell." }, 
-  { id:10, title:"BACARAT ROUGH", price:200, category:"perfume", img:"https://tse1.mm.bing.net/th/id/OIP.6KDoHBzpiCsaVMqKyk_eDAHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", desc:"feminin and good smell." }, 
-  { id:11, title:"ysl libre", price:145, category:"perfume", img:"https://tse4.mm.bing.net/th/id/OIP.u3TfR_u1XRSB_N9goSTEbwHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", desc:"strong , feminin smell." }, 
-  { id:12, title:"LANGIN ", price:25, category:"skincare", img:"https://th.bing.com/th/id/R.841237b582e6cc425b8ce9df1718a38d?rik=252oht%2f2V8VIQA&pid=ImgRaw&r=0", desc:"LIP GLOWY PALM." }, 
-  { id:13, title:"CLINIQUE", price:65, category:"skincare", img:"https://th.bing.com/th/id/R.cb1c033a9d30fd5060cfcf8e3315c1e5?rik=rpTgfz8D4bCUEA&riu=http%3a%2f%2fbpc.h-cdn.co%2fassets%2f16%2f24%2f1600x800%2flandscape-1465933706-clinique-makeup-skincare.jpg&ehk=y%2fSLzGXu%2bOaEgy6fyo7A8c8k%2fXaVlK9g2zwNWL6x7Jg%3d&risl=&pid=ImgRaw&r=0", desc:"19 product from Clinique." }, 
-  { id:14, title:"NARS foundation", price:79, category:"makeup", img:"https://www.refinery29.com/images/10015361.jpg", desc:"flawles skin and full coverage" }, 
-  { id:15, title:"NARS BLUSHR", price:53, category:"makeup", img:"https://tse2.mm.bing.net/th/id/OIP.X4mw_XNiA2P3_Lb7-0SdDAHaHa?rs=1&pid=ImgDetMain&o=7&rm=3", desc:"Brightens and smooths skin." }, 
-  { id:16, title:"NARS LIPSTIK", price:53, category:"makeup", img:"https://i5.walmartimages.com/asr/cc46db69-cb1a-46b5-b91a-040816f19474_1.a1519ecfa9f73feded71ec94e038d01f.jpeg", desc:"Brightens and smooths lips and stay for 8 hours." } 
-];
+function getCart(){ return JSON.parse(localStorage.getItem('cart')||'[]'); }
 
-
-// جلب الكرت من localStorage
-const cart = JSON.parse(localStorage.getItem('cart')||'[]');
-
-// عرض ملخص الكرت
 function renderCartSummary(){
+  const cart = getCart();
   const container = document.getElementById('cart-summary');
   container.innerHTML = '';
   if(cart.length===0){ container.innerHTML='<p>Your cart is empty.</p>'; return; }
   let total = 0;
   cart.forEach(item=>{
-    const p = products.find(prod=>prod.id===item.id) || {};
-    const color = item.color ? ` (${item.color})` : '';
-    const itemTotal = (p.price||0) * item.qty;
+    const itemTotal = item.price * item.qty;
     total += itemTotal;
     const div = document.createElement('div');
     div.className = 'cart-item';
     div.innerHTML = `<div style="display:flex;align-items:center;">
-      <img src="${item.selectedImg||p.img||''}" alt="${p.title||''}">
-      <span>${p.title||''}${color} x${item.qty}</span>
+      <img src="${item.img}" alt="${item.title}">
+      <span>${item.title}${item.color ? ' ('+item.color+')' : ''}</span>
     </div>
     <div>$${itemTotal}</div>`;
     container.appendChild(div);
@@ -147,42 +110,64 @@ function renderCartSummary(){
   container.appendChild(totalDiv);
 }
 
-renderCartSummary();
-
-// إرسال الفورم بشكل صحيح لكل منتج
-const form = document.getElementById('checkoutForm');
-
-form.addEventListener('submit', (e)=>{
-  e.preventDefault();
-  if(cart.length===0){ alert("Cart is empty!"); return; }
-
-  // مسح أي حقول مخفية قديمة
-  document.querySelectorAll('input[name^="products"]').forEach(i=>i.remove());
-
-  // إنشاء حقول لكل منتج
-  cart.forEach((item,index)=>{
-    const p = products.find(prod=>prod.id===item.id) || {};
-
-    const fields = [
-      {name:`products[${index}][title]`, value:p.title || ''},
-      {name:`products[${index}][color]`, value:item.color || ''},
-      {name:`products[${index}][qty]`, value:item.qty},
-      {name:`products[${index}][price]`, value:p.price || 0},
-    ];
-
-    fields.forEach(f=>{
-      const input = document.createElement('input');
-      input.type='hidden';
-      input.name = f.name;
-      input.value = f.value;
-      form.appendChild(input);
-    });
+const cardInfo = document.getElementById('cardInfo');
+document.querySelectorAll('input[name="payment"]').forEach(radio=>{
+  radio.addEventListener('change', ()=>{
+    cardInfo.style.display = radio.value==='card' ? 'block' : 'none';
   });
-
-  form.submit();
-  localStorage.removeItem('cart');
-  document.getElementById('successMsg').style.display='block';
 });
+
+const orderForm = document.getElementById('orderForm');
+orderForm.addEventListener('submit', (e)=>{
+  const name = document.getElementById('customerName').value.trim();
+  const phone = document.getElementById('customerPhone').value.trim();
+  const city = document.getElementById('customerCity').value;
+  const address = document.getElementById('customerAddress').value.trim();
+  const payment = document.querySelector('input[name="payment"]:checked').value;
+
+  if(!name || !phone || !city || !address){ 
+    alert("⚠ Please fill all customer info!"); 
+    e.preventDefault(); 
+    return; 
+  }
+
+  if(payment==='card'){
+    const cardNumber = document.getElementById('cardNumber').value.trim();
+    const cardExpiry = document.getElementById('cardExpiry').value.trim();
+    const cardCVV = document.getElementById('cardCVV').value.trim();
+    if(!cardNumber || !cardExpiry || !cardCVV){ 
+      alert("⚠ Please fill all card details!"); 
+      e.preventDefault(); 
+      return; 
+    }
+  }
+
+  // جهزي القيم داخل الفورم
+  document.getElementById('formName').value = name;
+  document.getElementById('formPhone').value = phone;
+  document.getElementById('formCity').value = city;
+  document.getElementById('formAddress').value = address;
+  document.getElementById('formPayment').value = payment;
+
+  const cart = getCart();
+  let cartText = cart.map(item=>{
+    return `${item.title} x${item.qty}${item.color ? " ("+item.color+")" : ""}`;
+  }).join(", ");
+  document.getElementById('formCart').value = cartText;
+
+  // امسح السلة
+  localStorage.removeItem('cart');
+  renderCartSummary();
+
+  // إظهار success message بعد الإرسال
+  orderForm.addEventListener("submit", ()=>{
+    document.getElementById('successMsg').style.display='block';
+  });
+});
+
+renderCartSummary();
 </script>
 </body>
 </html>
+
+
